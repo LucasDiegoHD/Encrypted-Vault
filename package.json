@@ -1,0 +1,11 @@
+{
+  "name": "lockpy-vault",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm start --prefix desktop",
+    "build": "npm run build --prefix desktop",
+    "dev": "npm run dev --prefix desktop",
+    "register-extension": "python -m vault.ipc.register_native_host"
+  }
+}

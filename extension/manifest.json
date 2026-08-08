@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Encrypted Vault Autofill",
+  "version": "1.0.0",
+  "description": "Zero-Knowledge Local Password Manager Autofill extension powered by LockPy engine.",
+  "permissions": [
+    "nativeMessaging",
+    "activeTab",
+    "scripting",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Encrypted Vault"
+  }
+}

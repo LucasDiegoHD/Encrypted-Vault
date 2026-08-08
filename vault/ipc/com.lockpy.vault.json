@@ -1,0 +1,10 @@
+{
+  "name": "com.lockpy.vault",
+  "description": "LockPy Vault Zero-Knowledge Native Host for Browser Extension",
+  "path": "C:\\Users\\User\\.gemini\\antigravity-ide\\scratch\\lockpy-vault\\vault\\ipc\\lockpy_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://*",
+    "chrome-extension://lhbkbjopocohpobfecacbbkgjnlkgdmd/"
+  ]
+}
