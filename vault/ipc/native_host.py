@@ -37,7 +37,10 @@ def process_ipc_request(req):
 
     if action == "unlock":
         if not vault_exists():
-            return {"status": "error", "message": "Vault file does not exist."}
+            try:
+                init_vault(vault_path, master_password)
+            except Exception as e:
+                return {"status": "error", "message": f"Erro ao criar cofre: {e}"}
         try:
             vault_data = load_vault(vault_path, master_password)
             entries = vault_data.get("entries", {})
@@ -61,7 +64,7 @@ def process_ipc_request(req):
                 "entries": processed_entries
             }
         except Exception as e:
-            return {"status": "error", "message": "Master password incorreta ou cofre corrompido."}
+            return {"status": "error", "message": "Senha Mestre incorreta ou cofre corrompido."}
 
     if action == "create_vault":
         if vault_exists():
@@ -74,7 +77,10 @@ def process_ipc_request(req):
 
     # Decrypt vault for all storage actions
     if not vault_exists():
-        return {"status": "error", "message": "Vault file does not exist."}
+        try:
+            init_vault(vault_path, master_password)
+        except Exception as e:
+            return {"status": "error", "message": "Cofre não encontrado."}
 
     try:
         vault_data = load_vault(vault_path, master_password)

@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <p>Cofre Bloqueado no aplicativo.<br>Desbloqueie o LockPy Vault Desktop para sincronização automática.</p>
+          <p>Cofre Bloqueado no aplicativo.<br>Desbloqueie o Encrypted Vault Desktop para sincronização automática.</p>
         </div>
       `;
     } else {
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
           <line x1="12" y1="2" x2="12" y2="12"></line>
         </svg>
-        <p>Inicie o aplicativo LockPy Vault Desktop para ativar a sincronização automática de senhas.</p>
+        <p>Inicie o aplicativo Encrypted Vault Desktop para ativar a sincronização automática de senhas.</p>
       </div>
     `;
   }

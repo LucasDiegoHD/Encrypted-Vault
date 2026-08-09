@@ -3,6 +3,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import http from 'http';
 import url from 'url';
+import fs from 'fs';
 
 let mainWindow: BrowserWindow | null = null;
 let quickSearchWindow: BrowserWindow | null = null;
@@ -15,6 +16,19 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 app.on('before-quit', () => {
   isQuitting = true;
 });
+
+function findProjectRoot(): string {
+  let curr = __dirname;
+  for (let i = 0; i < 8; i++) {
+    if (fs.existsSync(path.join(curr, 'vault', 'ipc', 'native_host.py'))) {
+      return curr;
+    }
+    const parent = path.dirname(curr);
+    if (parent === curr) break;
+    curr = parent;
+  }
+  return path.resolve(__dirname, '../../../');
+}
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -125,48 +139,82 @@ function toggleQuickSearch() {
 // Execute Python Core command via IPC helper
 function callPythonCore(args: string[], inputJson?: object): Promise<any> {
   return new Promise((resolve) => {
-    const pythonExe = process.platform === 'win32' ? 'python' : 'python3';
-    const pyProcess = spawn(pythonExe, ['-m', 'vault.ipc.native_host', ...args], {
-      cwd: path.join(__dirname, '../../../')
-    });
+    const projectRoot = findProjectRoot();
+    const env = {
+      ...process.env,
+      PYTHONPATH: `${projectRoot}${path.delimiter}${process.env.PYTHONPATH || ''}`
+    };
 
-    let rawBuffer = Buffer.alloc(0);
-    let errorData = '';
+    const pythonCommands = process.platform === 'win32' ? ['python', 'py'] : ['python3', 'python'];
+    let commandIndex = 0;
 
-    if (inputJson) {
-      const payload = Buffer.from(JSON.stringify(inputJson), 'utf-8');
-      const lenBuf = Buffer.alloc(4);
-      lenBuf.writeUInt32LE(payload.length, 0);
-      pyProcess.stdin.write(lenBuf);
-      pyProcess.stdin.write(payload);
-      pyProcess.stdin.end();
+    function trySpawn() {
+      const cmd = pythonCommands[commandIndex];
+      let rawBuffer = Buffer.alloc(0);
+      let errorData = '';
+      let hasError = false;
+
+      const pyProcess = spawn(cmd, ['-m', 'vault.ipc.native_host', ...args], {
+        cwd: projectRoot,
+        env: env
+      });
+
+      pyProcess.on('error', () => {
+        hasError = true;
+        commandIndex++;
+        if (commandIndex < pythonCommands.length) {
+          trySpawn();
+        } else {
+          resolve({ status: 'error', message: 'Python 3 não foi encontrado no sistema.' });
+        }
+      });
+
+      if (inputJson) {
+        const payload = Buffer.from(JSON.stringify(inputJson), 'utf-8');
+        const lenBuf = Buffer.alloc(4);
+        lenBuf.writeUInt32LE(payload.length, 0);
+        pyProcess.stdin.write(lenBuf);
+        pyProcess.stdin.write(payload);
+        pyProcess.stdin.end();
+      }
+
+      pyProcess.stdout?.on('data', (chunk: Buffer) => {
+        rawBuffer = Buffer.concat([rawBuffer, chunk]);
+      });
+
+      pyProcess.stderr?.on('data', (chunk: Buffer) => {
+        errorData += chunk.toString('utf-8');
+      });
+
+      pyProcess.on('close', (code: number) => {
+        if (hasError) return;
+
+        if (rawBuffer.length > 4) {
+          try {
+            const msgLen = rawBuffer.readUInt32LE(0);
+            const jsonBuf = rawBuffer.slice(4, 4 + msgLen);
+            const parsed = JSON.parse(jsonBuf.toString('utf-8'));
+            resolve(parsed);
+          } catch (e) {
+            resolve({ status: 'error', message: `JSON Parse error: ${e}` });
+          }
+        } else if (rawBuffer.length > 0) {
+          try {
+            const parsed = JSON.parse(rawBuffer.toString('utf-8'));
+            resolve(parsed);
+          } catch (e) {
+            resolve({ status: 'error', message: `JSON Parse error: ${e}` });
+          }
+        } else if (code !== 0 && commandIndex < pythonCommands.length - 1) {
+          commandIndex++;
+          trySpawn();
+        } else {
+          resolve({ status: 'error', message: errorData.trim() || 'No response from Python core' });
+        }
+      });
     }
 
-    pyProcess.stdout.on('data', (chunk) => {
-      rawBuffer = Buffer.concat([rawBuffer, chunk]);
-    });
-
-    pyProcess.stderr.on('data', (chunk) => {
-      errorData += chunk.toString('utf-8');
-    });
-
-    pyProcess.on('close', () => {
-      try {
-        if (rawBuffer.length > 4) {
-          const msgLen = rawBuffer.readUInt32LE(0);
-          const jsonBuf = rawBuffer.slice(4, 4 + msgLen);
-          const parsed = JSON.parse(jsonBuf.toString('utf-8'));
-          resolve(parsed);
-        } else if (rawBuffer.length > 0) {
-          const parsed = JSON.parse(rawBuffer.toString('utf-8'));
-          resolve(parsed);
-        } else {
-          resolve({ status: 'error', message: errorData || 'No response from Python core' });
-        }
-      } catch (err) {
-        resolve({ status: 'error', message: `Parse error: ${err}` });
-      }
-    });
+    trySpawn();
   });
 }
 
@@ -186,7 +234,7 @@ function startLocalHttpServer() {
     const parsedUrl = url.parse(req.url || '', true);
     if (parsedUrl.pathname === '/ping') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', app: 'LockPy Vault', unlocked: !!masterPasswordMemory }));
+      res.end(JSON.stringify({ status: 'ok', app: 'Encrypted Vault', unlocked: !!masterPasswordMemory }));
       return;
     }
 
@@ -301,6 +349,14 @@ function startLocalHttpServer() {
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'error', message: 'Not found' }));
+  });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log('⚠️ Port 54321 is already in use by an active Encrypted Vault daemon.');
+    } else {
+      console.error('HTTP Server Error:', err);
+    }
   });
 
   server.listen(54321, '127.0.0.1', () => {

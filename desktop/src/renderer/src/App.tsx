@@ -19,7 +19,7 @@ function MainApp() {
     }
   }, []);
 
-  const handleUnlock = async (password: string): Promise<boolean> => {
+  const handleUnlock = async (password: string): Promise<boolean | { success: boolean; message?: string }> => {
     if ((window as any).lockpyAPI?.authenticateVault) {
       const res = await (window as any).lockpyAPI.authenticateVault(password);
       if (res && res.status === 'ok') {
@@ -29,6 +29,7 @@ function MainApp() {
         setIsUnlocked(true);
         return true;
       }
+      return { success: false, message: res?.message || 'Authentication failed. Incorrect Master Password.' };
     } else {
       // Mock unlock for browser preview
       setServices(['github.com', 'google.com', 'aws.amazon.com', 'proton.me']);
@@ -36,7 +37,6 @@ function MainApp() {
       setIsUnlocked(true);
       return true;
     }
-    return false;
   };
 
   const handleCopyPassword = (serviceName: string) => {

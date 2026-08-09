@@ -27,22 +27,10 @@
 
 **Encrypted Vault** is an open-source, local-first password manager engineered with modern cryptographic primitives (**Argon2id + AES-256-GCM**), RAM memory sanitation, and atomic storage guarantees. 
 
-It provides seamless credential management across multiple interfaces: an interactive **Rich CLI**, a sleek **CustomTkinter Desktop GUI**, and a **Manifest V3 Chrome/Firefox Extension** connected via Native Messaging IPC.
+It provides seamless credential management across multiple interfaces: an interactive **Rich CLI**, a sleek **Electron + React Desktop Application** (with System Tray background execution & dynamic favicons), and a **Manifest V3 Chrome/Firefox Extension** connected via Native Messaging IPC.
 
 > [!NOTE]
 > **Powered by LockPy Engine**: Encrypted Vault utilizes the **LockPy** core security library (`vault.core`) for key derivation, RAM memory wiping, and secure atomic storage primitives.
-
----
-
-## 📸 Desktop Application Interface
-
-<div align="center">
-
-  | Unlock Screen | Main Vault Dashboard |
-  | :---: | :---: |
-  | <img src="assets/screenshot_login.png" alt="Unlock Screen" width="480"> | <img src="assets/screenshot_dashboard.png" alt="Dashboard Screen" width="480"> |
-
-</div>
 
 ---
 
@@ -52,7 +40,7 @@ It provides seamless credential management across multiple interfaces: an intera
 | :--- | :--- |
 | 🛡️ **Local-First Architecture** | Passwords are never sent across a network. Encryption occurs locally using keys derived on demand. |
 | 🔑 **Argon2id + AES-256-GCM** | State-of-the-art key derivation (Argon2id: 64MB RAM, 3 iterations) and authenticated 256-bit AES-GCM encryption. |
-| 🖥️ **Sleek Dark Desktop GUI** | Modern graphical user interface built with CustomTkinter for easy management of vaults and TOTP keys. |
+| 🖥️ **Sleek Dark Desktop App** | Modern graphical user interface built with Electron, React, and Tailwind CSS with System Tray background support and dynamic favicons. |
 | ⚡ **Rich Terminal CLI** | Full-featured command-line interface with interactive prompts, colored tables, and quick secret access. |
 | 🌐 **Browser Autofill Integration** | Native Messaging IPC Host connecting Chrome/Firefox Manifest V3 extension directly to your local vault. |
 | 📲 **RFC 6238 TOTP Authenticator** | Pure Python 2FA token generator with built-in QR code scanning tool (`otpauth://`). |
@@ -95,37 +83,58 @@ sequenceDiagram
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start & Installation Guide
 
-### 1. Installation
+Follow these simple steps to set up and run Encrypted Vault on your system:
 
-Clone the repository and install dependencies:
+### Step 1: Clone Repository & Install Python Dependencies
 
 ```bash
-# Clone repository
+# 1. Clone the repository
 git clone https://github.com/your-username/encrypted-vault.git
 cd encrypted-vault
 
-# Install required dependencies
+# 2. Install required Python security packages
 pip install -r requirements.txt
 ```
 
 > [!NOTE]
-> **Default Vault File Location**: By default, Encrypted Vault initializes and manages its primary encrypted database file named **`vault.vault`** stored in `~/.lockpy/vault.vault` (inside the user's home directory).
+> **Default Vault File Location**: Encrypted Vault initializes its primary encrypted database file named `vault.vault` stored in `~/.lockpy/vault.vault` (inside your home directory).
 
-### 2. Launch Graphical Desktop App (GUI)
+---
 
+### Step 2: Launch Desktop Application (Electron + React)
+
+You can launch the modern Desktop Application using any of the following 3 methods:
+
+#### ⚡ Method 1: Standalone Windows Executable (Recommended)
+Simply open and run `Encrypted Vault.exe` directly from the release folder:
+```
+desktop/release/Encrypted Vault-win32-x64/Encrypted Vault.exe
+```
+
+#### 💻 Method 2: Python Launcher
+From the repository root directory, run:
 ```bash
 python -m vault.gui.main
 ```
+*(This automatically launches the modern Electron + React Desktop Application)*
 
-### 3. Initialize & Use via Terminal CLI
+#### 🛠️ Method 3: NPM Development Server
+```bash
+cd desktop
+npm start
+```
+
+---
+
+### Step 3: Terminal CLI Usage (Optional)
 
 ```bash
-# Initialize a new encrypted vault
+# Initialize a new encrypted vault from terminal
 python -m vault.cli.main init
 
-# Add a credential
+# Add a new credential
 python -m vault.cli.main add --service github.com --username octocat --url https://github.com
 
 # Retrieve credential & copy password (clipboard auto-wipes after 15s)
@@ -224,20 +233,14 @@ flake8 vault/ tests/
 
 ```
 encrypted-vault/
-├── assets/
-│   └── banner.png                # GitHub Header Banner
-├── docs/
-│   ├── ARCHITECTURE.md           # System & Cryptographic Architecture
-│   └── NATIVE_MESSAGING.md       # Browser IPC Setup Guide
+├── assets/                       # GitHub Header Banner & Screenshots
+├── desktop/                      # Modern Electron + React Desktop App & .exe Build
+├── docs/                         # System Architecture & Native Host IPC Setup Guides
 ├── extension/                    # Manifest V3 Chrome/Firefox Extension
-│   ├── manifest.json
-│   ├── background.js
-│   ├── content.js
-│   └── popup.html
-├── vault/                        # Main Python Application Package
+├── vault/                        # Main Python Core Security Engine & CLI
 │   ├── core/                     # Crypto, Storage, Memory, TOTP, Send, Backup (LockPy Engine)
 │   ├── cli/                      # Rich Terminal CLI Interface
-│   ├── gui/                      # CustomTkinter Dark Mode GUI
+│   ├── gui/                      # CustomTkinter & Desktop Launchers
 │   ├── ipc/                      # Native Messaging Host Daemon
 │   └── tools/                    # QR Scanner & Helpers
 ├── tests/                        # Pytest Test Suite

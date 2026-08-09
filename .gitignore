@@ -49,3 +49,15 @@ coverage.xml
 # Environment variables & secrets
 .env
 .env.local
+
+# Node.js & Electron Desktop Build Artifacts
+node_modules/
+desktop/node_modules/
+desktop/dist/
+desktop/release/
+*.log
+npm-debug.log*
+
+# Scratch & Temporary Testing
+scratch/
+

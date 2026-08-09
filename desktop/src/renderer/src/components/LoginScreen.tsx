@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Lock, Eye, EyeOff, KeyRound, Sparkles, ArrowRight } from 'lucide-react';
 
 interface LoginScreenProps {
-  onUnlock: (password: string) => Promise<boolean>;
+  onUnlock: (password: string) => Promise<boolean | { success: boolean; message?: string }>;
 }
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onUnlock }) => {
@@ -20,8 +20,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onUnlock }) => {
     setErrorMsg('');
     setLoading(true);
     try {
-      const success = await onUnlock(password);
-      if (!success) {
+      const res = await onUnlock(password);
+      if (typeof res === 'object' && !res.success) {
+        setErrorMsg(res.message || 'Authentication failed. Incorrect Master Password.');
+      } else if (typeof res === 'boolean' && !res) {
         setErrorMsg('Authentication failed. Incorrect Master Password.');
       }
     } catch (err: any) {
