@@ -32,6 +32,7 @@ ENV/
 *.vault
 *.tmp
 *.bak
+*.lockpybk
 
 # Testing & Coverage
 .pytest_cache/

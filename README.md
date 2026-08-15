@@ -6,7 +6,7 @@
 
   **A High-Security, Local Password Manager & 2FA Vault**
 
-  [![CI Pipeline](https://github.com/lockpy/lockpy-vault/actions/workflows/ci.yml/badge.svg)](https://github.com/lockpy/lockpy-vault/actions)
+  [![CI Pipeline](https://github.com/LucasDiegoHD/Encrypted-Vault/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasDiegoHD/Encrypted-Vault/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
   [![Security: Bandit SAST](https://img.shields.io/badge/security-Bandit%20Passed-brightgreen)](https://github.com/PyCQA/bandit)
@@ -91,8 +91,8 @@ Follow these simple steps to set up and run Encrypted Vault on your system:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/encrypted-vault.git
-cd encrypted-vault
+git clone https://github.com/LucasDiegoHD/Encrypted-Vault.git
+cd Encrypted-Vault
 
 # 2. Install required Python security packages
 pip install -r requirements.txt
