@@ -18,6 +18,21 @@ app.on('before-quit', () => {
 });
 
 function findProjectRoot(): string {
+  const exeDir = path.dirname(app.getPath('exe'));
+  const candidates = [
+    process.resourcesPath,
+    exeDir,
+    process.cwd(),
+    app.getAppPath(),
+    __dirname
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(path.join(candidate, 'vault', 'ipc', 'native_host.py'))) {
+      return candidate;
+    }
+  }
+
   let curr = __dirname;
   for (let i = 0; i < 8; i++) {
     if (fs.existsSync(path.join(curr, 'vault', 'ipc', 'native_host.py'))) {
